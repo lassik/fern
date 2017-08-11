@@ -129,18 +129,39 @@
 		   resulting-list))))))
 
 (define (read-file)
-  (read-list #f #f 'file))
+  (read-list #f #f "toplevel"))
 
 (define builtins (make-hash-table))
 
+(define (evaluate form)
+  ;;(display "in evaluate ") (display form) (newline)
+  (if (not (pair? form))
+      form
+      (let ((handler (hash-table-ref builtins (car form))))
+	(apply handler (list (cdr form))))))
+
 (define-syntax defbuiltin
   (syntax-rules ()
-    ((_ name (args ...) body ...)
-     (hash-table-set! builtins name
-		      (lambda (args ...) body ...)))))
+    ((_ name (args) body ...)
+     (hash-table-set! builtins (symbol->string 'name)
+		      (lambda (args) body ...)))))
 
 (defbuiltin pipe (commands)
   a a)
 
-(display (read-file))
-(newline)
+(defbuiltin echo (args)
+  (let rec ((args args))
+    (if (null? args)
+	(newline)
+	(begin (display (car args))
+	       (if (cdr args)
+		   (begin (display " ")
+			  (rec (cdr args))))))))
+
+(defbuiltin toplevel (commands)
+  (let rec ((commands commands) (ans #f))
+    (if (null? commands)
+	ans
+	(rec (cdr commands) (evaluate (car commands))))))
+
+(evaluate (read-file))

@@ -16,12 +16,11 @@
 
 ;; Keywords
 
-(define pipe (gensym "pipe"))
-(define semicolon (gensym "semicolon"))
-(define getter (gensym "getter"))
+(define pipe 'pipe)
+(define getter 'getvar)
 (define splice (gensym "splice"))
 (define call (gensym "call"))
-(define listlit (gensym "list"))
+(define listlit 'list)
 (define body (gensym "body"))
 
 ;; Syntax char classes

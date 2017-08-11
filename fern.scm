@@ -2,7 +2,7 @@
 
 ;; Globals
 
-(define inp (open-input-file "script.fern"))
+(define inp (open-input-file (car (command-line-arguments))))
 
 ;; Utils
 

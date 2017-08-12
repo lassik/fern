@@ -1,4 +1,4 @@
-(use srfi-69)
+(use srfi-13 srfi-69)
 
 ;; Globals
 
@@ -29,7 +29,8 @@
   (or (eof-object? c) (eqv? #\newline c)))
 
 (define (bare-char? c)
-  (char-alphabetic? c))
+  (or (char-alphabetic? c) (char-numeric? c)
+      (string-index "+-*/%@&~^" c)))
 
 (define (white-char? c)
   (and (char-whitespace? c) (not (eol? c))))

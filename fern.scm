@@ -187,6 +187,10 @@
                    (begin (display " ")
                           (rec (cdr args))))))))
 
+(defbuiltin exit rest
+  (let ((exit-code (if (pair? rest) (string->number (car rest)) 0)))
+    (exit exit-code)))
+
 (defbuiltin toplevel commands
   (let rec ((commands commands) (ans #f))
     (if (null? commands)

@@ -167,6 +167,9 @@
 (defbuiltin pipe (commands)
   a a)
 
+(defbuiltin append (args)
+  (foldl string-append "" args))
+
 (defbuiltin echo (args)
   (let rec ((args args))
     (if (null? args)

@@ -51,15 +51,15 @@
   (if (not (rc? (=p #\#)))
       #f
       (let rec ()
-	(if (rc? eol?)
-	    #t
-	    (begin (rc? (lambda (c) #t))
-		   (rec))))))
+        (if (rc? eol?)
+            #t
+            (begin (rc? (lambda (c) #t))
+                   (rec))))))
 
 (define (skip-whitespace)
   (let rec ()
     (if (or (rc* white-char?) (skip-comment))
-	(rec)))
+        (rec)))
   #f)
 
 (define (read-bareword)
@@ -69,21 +69,21 @@
   (if (not (rc? (=p #\$)))
       #f
       (let ((head (if (rc? (=p #\@)) splice getter)))
-	(let ((word (read-bareword)))
-	  (if (not word)
-	      (error "No word after $")
-	      (list head word))))))
+        (let ((word (read-bareword)))
+          (if (not word)
+              (error "No word after $")
+              (list head word))))))
 
 (define (read-quoted quote-char)
   (if (not (rc? (=p #\")))
       #f
       (let rec ((chars '()))
-	(cond ((rc? (=p #\"))
-	       (list->string (reverse chars)))
-	      (else
-	       (rc? (=p #\\))
-	       (let ((char (rc? (lambda (c) (not (eol? c))))))
-		 (rec (cons char chars))))))))
+        (cond ((rc? (=p #\"))
+               (list->string (reverse chars)))
+              (else
+               (rc? (=p #\\))
+               (let ((char (rc? (lambda (c) (not (eol? c))))))
+                 (rec (cons char chars))))))))
 
 (define (read-value)
   (or (read-list #\( #\) #f)
@@ -96,50 +96,50 @@
 
 (define (list->lists newlist lists)
   (cond ((null? newlist)
-	 lists)
-	((null? (cdr newlist))
-	 (cons (car newlist) lists))
-	(else
-	 (cons (reverse newlist) lists))))
+         lists)
+        ((null? (cdr newlist))
+         (cons (car newlist) lists))
+        (else
+         (cons (reverse newlist) lists))))
 
 (define (pipeify cur-pipes done-lists)
   (cond ((null? cur-pipes)
-	 done-lists)
-	((null? (cdr cur-pipes))
-	 (cons (car cur-pipes) done-lists))
-	(else
-	 (cons (cons pipe (reverse cur-pipes))
-	       done-lists))))
+         done-lists)
+        ((null? (cdr cur-pipes))
+         (cons (car cur-pipes) done-lists))
+        (else
+         (cons (cons pipe (reverse cur-pipes))
+               done-lists))))
 
 (define (read-list open-char close-char head)
   (if (and open-char (not (rc? (=p open-char))))
       #f
       (let ((resulting-list
-	     (let rec ((cur-list '()) (cur-pipes '()) (done-lists '()))
-	       (define (finish-pipeline)
-		 (let ((cur-pipes (list->lists cur-list cur-pipes)))
-		   (pipeify cur-pipes done-lists)))
-	       (skip-whitespace)
-	       (cond ((rc? (if (eqv? close-char #f) eof-object? (=p close-char)))
-		      (reverse (finish-pipeline)))
-		     ((or (rc? (=p #\;)) (rc? (=p #\newline)))
-		      (rec '() '() (finish-pipeline)))
-		     (else
-		      (if (rc? (=p #\|))
-			  (rec '()
-			       (list->lists cur-list cur-pipes)
-			       done-lists)
-			  (rec (cons (read-value) cur-list)
-			       cur-pipes
-			       done-lists)))))))
-	(if head
-	    (cons head resulting-list)
-	    (cond ((null? resulting-list)
-		   resulting-list)
-		  ((null? (cdr resulting-list))
-		   (car resulting-list))
-		  (else
-		   resulting-list))))))
+             (let rec ((cur-list '()) (cur-pipes '()) (done-lists '()))
+               (define (finish-pipeline)
+                 (let ((cur-pipes (list->lists cur-list cur-pipes)))
+                   (pipeify cur-pipes done-lists)))
+               (skip-whitespace)
+               (cond ((rc? (if (eqv? close-char #f) eof-object? (=p close-char)))
+                      (reverse (finish-pipeline)))
+                     ((or (rc? (=p #\;)) (rc? (=p #\newline)))
+                      (rec '() '() (finish-pipeline)))
+                     (else
+                      (if (rc? (=p #\|))
+                          (rec '()
+                               (list->lists cur-list cur-pipes)
+                               done-lists)
+                          (rec (cons (read-value) cur-list)
+                               cur-pipes
+                               done-lists)))))))
+        (if head
+            (cons head resulting-list)
+            (cond ((null? resulting-list)
+                   resulting-list)
+                  ((null? (cdr resulting-list))
+                   (car resulting-list))
+                  (else
+                   resulting-list))))))
 
 (define (read-file)
   (read-list #f #f "toplevel"))
@@ -155,8 +155,8 @@
   (if (not (pair? form))
       form
       (let ((head ((if (string? (car form)) lookup evaluate)
-		   (car form)))
-	    (tail (map evaluate (cdr form))))
+                   (car form)))
+            (tail (map evaluate (cdr form))))
         (apply head tail))))
 
 (define-syntax defbuiltin
@@ -175,16 +175,16 @@
 (defbuiltin echo args
   (let rec ((args args))
     (if (null? args)
-	(newline)
-	(begin (display (car args))
-	       (if (cdr args)
-		   (begin (display " ")
-			  (rec (cdr args))))))))
+        (newline)
+        (begin (display (car args))
+               (if (cdr args)
+                   (begin (display " ")
+                          (rec (cdr args))))))))
 
 (defbuiltin toplevel commands
   (let rec ((commands commands) (ans #f))
     (if (null? commands)
-	ans
-	(rec (cdr commands) (evaluate (car commands))))))
+        ans
+        (rec (cdr commands) (evaluate (car commands))))))
 
 (evaluate (read-file))

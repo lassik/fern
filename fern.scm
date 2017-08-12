@@ -157,21 +157,22 @@
       (let ((head ((if (string? (car form)) lookup evaluate)
 		   (car form)))
 	    (tail (map evaluate (cdr form))))
-	(head tail))))
+        (apply head tail))))
 
 (define-syntax defbuiltin
   (syntax-rules ()
-    ((_ name (args) body ...)
+    ((_ name args body ...)
      (hash-table-set! builtins (symbol->string 'name)
-		      (lambda (args) body ...)))))
+                      (lambda args
+			body ...)))))
 
-(defbuiltin pipe (commands)
+(defbuiltin pipe commands
   a a)
 
-(defbuiltin append (args)
+(defbuiltin append args
   (foldl string-append "" args))
 
-(defbuiltin echo (args)
+(defbuiltin echo args
   (let rec ((args args))
     (if (null? args)
 	(newline)
@@ -180,7 +181,7 @@
 		   (begin (display " ")
 			  (rec (cdr args))))))))
 
-(defbuiltin toplevel (commands)
+(defbuiltin toplevel commands
   (let rec ((commands commands) (ans #f))
     (if (null? commands)
 	ans

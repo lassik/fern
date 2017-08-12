@@ -159,12 +159,18 @@
             (tail (map evaluate (cdr form))))
         (apply head tail))))
 
+(define (coerce-to-number val)
+  (if (number? val) val (string->number val)))
+
 (define-syntax defbuiltin
   (syntax-rules ()
     ((_ name args body ...)
      (hash-table-set! builtins (symbol->string 'name)
                       (lambda args
 			body ...)))))
+
+(defbuiltin + args
+  (apply + (map coerce-to-number args)))
 
 (defbuiltin pipe commands
   a a)

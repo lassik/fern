@@ -145,12 +145,18 @@
 
 (define builtins (make-hash-table))
 
+(define (lookup value)
+  (or (hash-table-ref builtins value)
+      (error (string-append "Not defined: " (value)))))
+
 (define (evaluate form)
   ;;(display "in evaluate ") (display form) (newline)
   (if (not (pair? form))
       form
-      (let ((handler (hash-table-ref builtins (car form))))
-	(apply handler (list (cdr form))))))
+      (let ((head ((if (string? (car form)) lookup evaluate)
+		   (car form)))
+	    (tail (map evaluate (cdr form))))
+	(head tail))))
 
 (define-syntax defbuiltin
   (syntax-rules ()

@@ -73,10 +73,22 @@
 	      (error "No word after $")
 	      (list head word))))))
 
+(define (read-quoted quote-char)
+  (if (not (rc? (=p #\")))
+      #f
+      (let rec ((chars '()))
+	(cond ((rc? (=p #\"))
+	       (list->string (reverse chars)))
+	      (else
+	       (rc? (=p #\\))
+	       (let ((char (rc? (lambda (c) (not (eol? c))))))
+		 (rec (cons char chars))))))))
+
 (define (read-value)
   (or (read-list #\( #\) #f)
       (read-list #\[ #\] listlit)
       (read-list #\{ #\} body)
+      (read-quoted #\")
       (read-getter)
       (read-bareword)
       (error "No value could be read at point")))

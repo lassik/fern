@@ -85,13 +85,22 @@
                (let ((char (rc? (lambda (c) (not (eol? c))))))
                  (rec (cons char chars))))))))
 
+(define (read-as)
+  (let ((args (accumulate (lambda () (skip-whitespace) (read-bareword)))))
+    (skip-whitespace)
+    (let ((body (read-list #\{ #\} #f)))
+      (list 'as args body))))
+
 (define (read-value)
   (or (read-list #\( #\) #f)
       (read-list #\[ #\] listlit)
       (read-list #\{ #\} body)
       (read-quoted #\")
       (read-getter)
-      (read-bareword)
+      (let ((bareword (read-bareword)))
+	(if (equal? "as" bareword)
+	    (read-as)
+	    bareword))
       (error "No value could be read at point")))
 
 (define (list->lists newlist lists)
@@ -174,6 +183,10 @@
 
 (defbuiltin pipe commands
   a a)
+
+(defbuiltin as args
+  (display args)
+  (newline))
 
 (defbuiltin append args
   (foldl string-append "" args))
